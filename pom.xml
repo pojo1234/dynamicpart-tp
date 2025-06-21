@@ -4,11 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.pojo123.dynamicparttp</groupId>
+    <groupId>io.github.dynamicpart-tp</groupId>
     <artifactId>dynamicpart-tp</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
-
+    <url>>https://gitee.com/pojo123/dynamicpart-tp.git</url>
+    <name>dynamicpart-tp</name>
+    <description>动态分分区线程池,支持项目直接调用，线程池分区管理，异常栈导出</description>
 
 
     <licenses>
@@ -45,6 +47,7 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <maven-site-plugin.version>3.7.1</maven-site-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson-databind.version>2.8.10</jackson-databind.version>
         <commons-lang3.version>3.4</commons-lang3.version>
@@ -102,6 +105,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.9.1</version>
+                <configuration>
+                    <additionalJOptions>
+                        <additionalJOption>-Xdoclint:none</additionalJOption>
+                    </additionalJOptions>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -115,10 +123,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>1.5</version>
-                <configuration>
-                    <executable>D:\Gpg4win\bin\gpg</executable>
-                    <keyname>pojo123</keyname>
-                </configuration>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -128,6 +132,32 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Implementation-Title>${project.artifactId}</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Build-Time>${maven.build.timestamp}</Build-Time>
+                            <Built-By>pojo123</Built-By>
+                        </manifestEntries>
+                    </archive>
+                    <classesDirectory/>
+                    <outputDirectory/>
+                    <testClassesDirectory/>
+                </configuration>
+            </plugin>
+
+            <!--所有子模块都要执行的plugin-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>${maven-site-plugin.version}</version>
             </plugin>
 
         </plugins>
