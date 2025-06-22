@@ -1,6 +1,9 @@
 package org.pojo123.dynamicparttp;
 
 
+import org.pojo123.dynamicparttp.registry.ThreadPoolRegistry;
+import org.pojo123.dynamicparttp.threadpool.TraceableThreadPool;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -17,13 +20,13 @@ import java.util.concurrent.TimeUnit;
  **/
 public class DynamicPartThreadPoolManager {
 
-    private final DynamicPartThreadPoolRegistry dynamicPartThreadPoolRegistry;
+    private final ThreadPoolRegistry threadPoolRegistry;
 
     private static volatile DynamicPartThreadPoolManager dynamicPartThreadPoolManager;
 
 
     public DynamicPartThreadPoolManager() {
-        this.dynamicPartThreadPoolRegistry = new DynamicPartThreadPoolRegistry();
+        this.threadPoolRegistry = new ThreadPoolRegistry();
     }
 
 
@@ -44,7 +47,7 @@ public class DynamicPartThreadPoolManager {
      *
      * @return ThreadPoolExecutor 线程池
      */
-    public DynamicPartThreadPool getDynamicThreadPool(String threadNamePrefix) {
+    public TraceableThreadPool getDynamicThreadPool(String threadNamePrefix) {
         return getDynamicThreadPool(threadNamePrefix, 2, 8, 3, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100));
     }
 
@@ -56,11 +59,11 @@ public class DynamicPartThreadPoolManager {
      * @param workQueue       工作队列
      * @return
      */
-    public DynamicPartThreadPool getDynamicThreadPool(String namePrefix, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
+    public TraceableThreadPool getDynamicThreadPool(String namePrefix, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
         //先根据要求查询 theadPoolMap中是否含有要求的线程池，没有则新增，有则直接拿出来
-        DynamicPartThreadPool threadPool = dynamicPartThreadPoolRegistry.getByThreadNamePrefix(namePrefix);
+        TraceableThreadPool threadPool = threadPoolRegistry.getByThreadNamePrefix(namePrefix);
         if (threadPool == null) {
-            return dynamicPartThreadPoolRegistry.createThreadPool(namePrefix, corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
+            return threadPoolRegistry.createThreadPool(namePrefix, corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
         }
         return threadPool;
     }
