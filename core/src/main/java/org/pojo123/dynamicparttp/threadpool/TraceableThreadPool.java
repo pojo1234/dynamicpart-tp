@@ -2,11 +2,12 @@ package org.pojo123.dynamicparttp.threadpool;
 
 
 import org.pojo123.dynamicparttp.DynamicExecutors;
+import org.pojo123.dynamicparttp.task.AbstractTrackableTask;
+import org.pojo123.dynamicparttp.task.TrackableCallable;
 import org.pojo123.dynamicparttp.task.TrackableFutureTask;
 import org.pojo123.dynamicparttp.reject.FallBackAlertRejectPolicy;
-import org.pojo123.dynamicparttp.task.AbstractMonitoredTask;
-import org.pojo123.dynamicparttp.task.MonitoredCallable;
-import org.pojo123.dynamicparttp.task.MonitoredRunnable;
+import org.pojo123.dynamicparttp.task.TrackableRunnable;
+
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -43,7 +44,7 @@ public class TraceableThreadPool  extends ThreadPoolExecutor {
 
     @Override
     protected void beforeExecute(Thread t, Runnable r) {
-        if (r instanceof TrackableFutureTask || r instanceof AbstractMonitoredTask) {
+        if (r instanceof TrackableFutureTask || r instanceof AbstractTrackableTask) {
             activeThreads.put(Thread.currentThread().getName(), Thread.currentThread());
             taskExecuteTime.put(t.getName(), System.currentTimeMillis());
         }
@@ -57,18 +58,18 @@ public class TraceableThreadPool  extends ThreadPoolExecutor {
         if (r instanceof TrackableFutureTask) {
             TrackableFutureTask futureTask = (TrackableFutureTask) r;
             Object originalTask = futureTask.getOriginalTask();
-            if (originalTask instanceof AbstractMonitoredTask) {
-               removeGrapher((AbstractMonitoredTask) originalTask);
+            if (originalTask instanceof AbstractTrackableTask) {
+               removeGrapher((AbstractTrackableTask) originalTask);
             }
         }
-        if (r instanceof AbstractMonitoredTask){
-            removeGrapher((AbstractMonitoredTask) r);
+        if (r instanceof AbstractTrackableTask){
+            removeGrapher((AbstractTrackableTask) r);
         }
 
         super.afterExecute(r, t);
     }
 
-    private void  removeGrapher(AbstractMonitoredTask monitoredTask ){
+    private void  removeGrapher(AbstractTrackableTask monitoredTask ){
         taskExecuteTime.remove(monitoredTask.getThreadName());
         activeThreads.remove(monitoredTask.getThreadName());
     }
@@ -87,10 +88,10 @@ public class TraceableThreadPool  extends ThreadPoolExecutor {
      *
      * @return
      */
-    public Map<String, Long> getCurrentTaskInfo() {
-        Map<String, Long> taskInfo = new HashMap<>();
+    public Map<String, String> getCurrentTaskInfo() {
+        Map<String, String> taskInfo = new HashMap<>();
         taskExecuteTime.forEach((k, v) -> {
-            taskInfo.put(k, System.currentTimeMillis() - v);
+            taskInfo.put(k, (System.currentTimeMillis() - v)+"ms");
         });
         return taskInfo;
     }
@@ -100,7 +101,7 @@ public class TraceableThreadPool  extends ThreadPoolExecutor {
      */
     public Future<?> submitDynamic(Runnable runnable) {
         if (runnable == null) throw new NullPointerException();
-        TrackableFutureTask<Void> futureTask = new TrackableFutureTask<>(new MonitoredRunnable<>(runnable));
+        TrackableFutureTask<Void> futureTask = new TrackableFutureTask<>(new TrackableRunnable<>(runnable));
         execute(futureTask);
         return futureTask;
     }
@@ -110,7 +111,7 @@ public class TraceableThreadPool  extends ThreadPoolExecutor {
      */
     public <T> Future<T> submitDynamic(Runnable runnable, T result) {
         if (runnable == null) throw new NullPointerException();
-        TrackableFutureTask<T> futureTask = new TrackableFutureTask<T>(new MonitoredRunnable<>(runnable), result);
+        TrackableFutureTask<T> futureTask = new TrackableFutureTask<T>(new TrackableRunnable<>(runnable), result);
         execute(futureTask);
         return futureTask;
     }
@@ -120,7 +121,7 @@ public class TraceableThreadPool  extends ThreadPoolExecutor {
      */
     public <T> Future<T> submitDynamic(Callable<T> callable) {
         if (callable == null) throw new NullPointerException();
-        TrackableFutureTask<T> futureTask = new TrackableFutureTask<>(new MonitoredCallable<>(callable));
+        TrackableFutureTask<T> futureTask = new TrackableFutureTask<>(new TrackableCallable(callable));
         execute(futureTask);
         return futureTask;
     }
@@ -133,7 +134,7 @@ public class TraceableThreadPool  extends ThreadPoolExecutor {
      */
     public void executeDynamic(Runnable runnable) {
         if (runnable==null) throw  new NullPointerException();
-        execute(new MonitoredRunnable<>(runnable));
+        execute(new TrackableRunnable<>(runnable));
     }
 
     /**

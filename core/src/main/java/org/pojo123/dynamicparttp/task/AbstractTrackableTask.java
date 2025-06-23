@@ -8,7 +8,7 @@ package org.pojo123.dynamicparttp.task;
  * @version: 1.0
  */
 
-public abstract class AbstractMonitoredTask<T> {
+public abstract class AbstractTrackableTask<T> {
 
     /**
      * 任务执行开始时间
@@ -23,7 +23,7 @@ public abstract class AbstractMonitoredTask<T> {
 
     protected T task;
 
-    public AbstractMonitoredTask(T task) {
+    public AbstractTrackableTask(T task) {
         this.task = task;
     }
 

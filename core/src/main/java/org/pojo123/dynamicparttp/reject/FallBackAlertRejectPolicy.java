@@ -2,7 +2,7 @@ package org.pojo123.dynamicparttp.reject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.pojo123.dynamicparttp.degradation.FallbackExecutor;
+import org.pojo123.dynamicparttp.degradation.FallBackExecutor;
 import org.pojo123.dynamicparttp.threadpool.TraceableThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +67,7 @@ public class FallBackAlertRejectPolicy implements RejectedExecutionHandler {
             executor.setMaximumPoolSize(newMaxPoolSize);
             executor.submit(r);
         } else {
-            FallbackExecutor.INSTANCE.submit(r);
+            FallBackExecutor.INSTANCE.submit(r);
         }
     }
 

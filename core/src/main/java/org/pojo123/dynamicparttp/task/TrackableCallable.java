@@ -10,10 +10,10 @@ import java.util.concurrent.Callable;
  * @version: 1.0
  */
 
-public class MonitoredCallable<V> extends AbstractMonitoredTask<Callable<V>> implements Callable<V> {
+public class  TrackableCallable<V> extends AbstractTrackableTask<Callable<V>> implements Callable<V> {
 
 
-    public MonitoredCallable(Callable<V> task) {
+    public TrackableCallable(Callable<V> task) {
         super(task);
     }
 

@@ -8,10 +8,10 @@ package org.pojo123.dynamicparttp.task;
  * @version: 1.0
  */
 
-public class MonitoredRunnable<T extends Runnable> extends AbstractMonitoredTask<T> implements Runnable {
+public class TrackableRunnable<T extends Runnable> extends AbstractTrackableTask <T> implements Runnable {
 
 
-    public MonitoredRunnable(T runnable) {
+    public TrackableRunnable(T runnable) {
             super(runnable);
     }
 
