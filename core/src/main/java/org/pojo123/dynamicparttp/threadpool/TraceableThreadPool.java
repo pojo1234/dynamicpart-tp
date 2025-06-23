@@ -19,6 +19,11 @@ import java.util.concurrent.*;
 public class TraceableThreadPool  extends ThreadPoolExecutor {
 
     /**
+     * 任务前缀
+     */
+    private  String namePrefix;
+
+    /**
      * 线程执行时间
      */
     private final ConcurrentHashMap<String, Long> taskExecuteTime = new ConcurrentHashMap<>();
@@ -32,6 +37,7 @@ public class TraceableThreadPool  extends ThreadPoolExecutor {
 
     public TraceableThreadPool(String namePrefix, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, DynamicExecutors.defaultThreadFactory(namePrefix), new FallBackAlertRejectPolicy());
+        this.namePrefix=namePrefix;
     }
 
 
@@ -128,6 +134,14 @@ public class TraceableThreadPool  extends ThreadPoolExecutor {
     public void executeDynamic(Runnable runnable) {
         if (runnable==null) throw  new NullPointerException();
         execute(new MonitoredRunnable<>(runnable));
+    }
+
+    /**
+     * 获取线程池名称前缀
+     * @return
+     */
+    public String getNamePrefix(){
+        return namePrefix;
     }
 
 

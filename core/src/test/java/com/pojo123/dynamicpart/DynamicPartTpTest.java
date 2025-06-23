@@ -1,6 +1,7 @@
 package com.pojo123.dynamicpart;
 
 import org.pojo123.dynamicparttp.DynamicPartThreadPoolManager;
+import org.pojo123.dynamicparttp.threadpool.TraceableThreadPool;
 
 import java.time.Period;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.concurrent.*;
 public class DynamicPartTpTest {
 
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main1(String[] args) throws ExecutionException, InterruptedException {
         Future<Date> submit = Executors.newFixedThreadPool(1).submit(() -> new Date());
         DynamicPartThreadPoolManager.getInstance().getDynamicThreadPool("自定义业").submitDynamic(() -> {
             return new Date();
@@ -62,6 +63,37 @@ public class DynamicPartTpTest {
             futureTask.get();
         }
         DynamicPartThreadPoolManager instance = DynamicPartThreadPoolManager.getInstance();
+    }
+
+
+    public static void main(String[] args) throws InterruptedException {
+        ArrayList<Future> res = new ArrayList<>();
+        for (int i = 0; i < 200; i++) {
+            int finalI = i;
+            TraceableThreadPool dynamicThreadPool = DynamicPartThreadPoolManager.getInstance().getDynamicThreadPool("业务线程池" + 1);
+//            res.add(dynamicThreadPool.submit(()-> System.out.println("执行提交业务执行"+ finalI)));
+            res.add(dynamicThreadPool.submitDynamic(() ->{
+                        System.out.println(Thread.currentThread().getName()+":动态提交任务执行" + finalI);
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                   ));
+
+        }
+        res.forEach(future -> {
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        System.out.println("over");
+        DynamicPartThreadPoolManager.getInstance();
     }
 
 

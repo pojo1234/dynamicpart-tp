@@ -36,6 +36,7 @@ public class FallBackAlertRejectPolicy implements RejectedExecutionHandler {
     private final AtomicLong rejectCount = new AtomicLong(0);
     private static final double EXPANSION_FACTOR = 1.5;
     private static final int REJECT_COUNT_LIMIT = 2;
+    private static  final String UNKNOW_THREAD_EXECUTORS="UNKNOW_THREAD_EXECUTORS";
 
     private final AtomicBoolean isDumpStack = new AtomicBoolean(true);
 
@@ -49,20 +50,20 @@ public class FallBackAlertRejectPolicy implements RejectedExecutionHandler {
         int activeCount = executor.getActiveCount();
         String warnStr = String.format("当前线程池发生第%d次拒绝异常,activeCountSize:%d,coreSize:%d,poolSize:%d,queueSize:%d", incrementAndGet, activeCount, corePoolSize, poolSize, queueSize);
         logger.info(warnStr);
-
+        TraceableThreadPool dynamicPartThreadPool = null;
         try {
 //                QwAlertUtil.sendTextAlert(warnStr);
             if (isDumpStack.getAndSet(false) && executor instanceof TraceableThreadPool) {
                 //持久化
-                TraceableThreadPool dynamicPartThreadPool = (TraceableThreadPool) executor;
+                dynamicPartThreadPool  = (TraceableThreadPool) executor;
                 persistenceActiveThreads(dynamicPartThreadPool);
             }
         } catch (Exception e) {
             logger.error("DynamicPartPool告警转储失败!", e);
         }
-        if (incrementAndGet <= EXPANSION_FACTOR) {
+        if (incrementAndGet <= REJECT_COUNT_LIMIT) {
             int newMaxPoolSize=(int) (executor.getMaximumPoolSize() * 1.5);
-            logger.info("线程池:{}开始扩容",executor);
+            logger.info(String.format("线程池:%s开始扩容,oldMaxPoolSize:%d->newMaxPoolSize:%d",dynamicPartThreadPool==null?UNKNOW_THREAD_EXECUTORS:dynamicPartThreadPool.getNamePrefix(),executor.getMaximumPoolSize(),newMaxPoolSize));
             executor.setMaximumPoolSize(newMaxPoolSize);
             executor.submit(r);
         } else {

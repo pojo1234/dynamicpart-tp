@@ -48,7 +48,7 @@ public class ThreadPoolRegistry {
      */
     public TraceableThreadPool createThreadPool(String namePrefix, int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
         if (threadPoolExecutorMap!=null && threadPoolExecutorMap.size()>DEFAULT_RATED_SIZE){
-            throw new IllegalStateException("线程池数量超出限制: " + DEFAULT_RATED_SIZE);
+            throw new IllegalStateException("线程池管理器线程池数量超出额定限制: " + DEFAULT_RATED_SIZE);
         }
         return  threadPoolExecutorMap.computeIfAbsent(namePrefix,k-> new TraceableThreadPool(namePrefix, corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue));
     }

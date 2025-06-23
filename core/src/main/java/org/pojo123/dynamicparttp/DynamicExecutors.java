@@ -1,24 +1,9 @@
 package org.pojo123.dynamicparttp;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.RejectedExecutionHandler;
+import org.apache.commons.lang3.StringUtils;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+
 
 /**
  * @author zhoudetao
@@ -69,6 +54,9 @@ public class DynamicExecutors {
     }
 
     public static ThreadFactory defaultThreadFactory(String threadNamePrefix) {
+        if (StringUtils.isBlank(threadNamePrefix)){
+            throw new IllegalArgumentException("线程名称前缀不可为空");
+        }
         return new DynamicPartThreadFactory(threadNamePrefix);
     }
 
